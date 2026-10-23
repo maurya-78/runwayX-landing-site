@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence, useMotionValueEvent, useScroll, useSpring } from "motion/react";
+import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "motion/react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,31 +14,30 @@ const links = [
 ];
 
 /**
- * Runway mark + wordmark. One artwork everywhere: ink strips with the leaf-green
- * chevron (same as the favicon). On dark backgrounds (`light`) it sits on the
- * white logo tile so the colors stay identical. The mark is decorative, so the
- * wordmark beside it carries the name.
+ * Runway mark + wordmark on a transparent background. Light backgrounds use the
+ * ink mark; dark backgrounds (`light`) use the light mark with the bright-green
+ * chevron. The mark is decorative, so the wordmark beside it carries the name.
  */
 export function Logo({ light = false, priority = false }: { light?: boolean; priority?: boolean }) {
   return (
-    <span className={`flex items-center gap-2.5 ${light ? "text-white" : "text-ink"}`}>
+    <span className={`flex items-center gap-2 ${light ? "text-white" : "text-ink"}`}>
+      {/* Mark height ~1.6x the wordmark cap so the two read as one unit */}
       <Image
-        src={light ? "/logo-tile.png" : "/logo-mark-ink.png"}
+        src={light ? "/logo-mark.png" : "/logo-nav.png"}
         alt=""
         width={512}
         height={512}
         priority={priority}
-        className="h-9 w-9 shrink-0"
+        className={light ? "h-10 w-10 shrink-0" : "h-9 w-9 shrink-0"}
       />
-      <span className="text-xl font-semibold leading-none tracking-[-0.01em]">RunwayX</span>
+      <span className="text-[22px] font-semibold leading-none tracking-[-0.03em]">RunwayX</span>
     </span>
   );
 }
 
 /**
  * Floating glass navbar: slides in on load, hides while scrolling down and
- * returns on scroll up, a pill follows the hovered link, and a thin bar shows
- * reading progress.
+ * returns on scroll up, and a pill follows the hovered link.
  */
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -46,8 +45,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
 
-  const { scrollY, scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30 });
+  const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (y) => {
     const prev = scrollY.getPrevious() ?? 0;
@@ -72,12 +70,12 @@ export default function Navbar() {
         {/* Glass sheen */}
         <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
 
-        <nav aria-label="Main" className="flex h-[56px] items-center justify-between px-4 sm:px-5">
+        <nav aria-label="Main" className="flex h-[60px] items-center justify-between px-4 sm:px-5">
           <Link href="/#top" aria-label="RunwayX home">
             <Logo priority />
           </Link>
 
-          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center text-[13px] text-ink/75 md:flex" onMouseLeave={() => setHover(null)}>
+          <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center text-[14.5px] font-medium tracking-[-0.01em] text-ink/70 md:flex" onMouseLeave={() => setHover(null)}>
             {links.map((l) => (
               <li key={l.label} className="relative">
                 <Link
@@ -102,7 +100,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <Link
               href="/#download"
-              className="group relative overflow-hidden rounded-[10px] bg-[#140d0b] px-3.5 py-2 text-[13px] font-semibold text-white transition hover:bg-black/85"
+              className="group relative overflow-hidden rounded-[11px] bg-[#140d0b] px-4 py-2.5 text-[14.5px] font-semibold tracking-[-0.01em] text-white transition hover:bg-black/85"
             >
               <span className="relative z-10">Get the app</span>
               {/* Shine sweep */}
@@ -141,13 +139,6 @@ export default function Navbar() {
             </motion.ul>
           )}
         </AnimatePresence>
-
-        {/* Reading progress */}
-        <motion.span
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-gradient-to-r from-sky via-leaf to-gold"
-          style={{ scaleX: progress }}
-        />
       </div>
     </motion.header>
   );

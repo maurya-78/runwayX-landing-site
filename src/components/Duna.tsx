@@ -3,9 +3,8 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { ChevronRight } from "lucide-react";
-import CloudSky from "./CloudSky";
 import { Logo } from "./Navbar";
-import { FloatCard, HandNote, HandPhone } from "./Mockups";
+import { FloatCard, HandNote, RisingPhone } from "./Mockups";
 import { Accent } from "./Sections";
 import Link from "next/link";
 import AskAI from "./AskAI";
@@ -63,17 +62,19 @@ export function Hero() {
   return (
     <section id="top" className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-white pb-16 pt-[60px] sm:pb-20">
       {/* Painting: "The Rocky Mountains, Lander's Peak" by Albert Bierstadt (public domain) */}
+      {/* Settles to scale 1, so the painting ends at native sharpness (no lasting upscale) */}
       <motion.div
         className="absolute inset-0"
-        initial={{ scale: 1.12 }}
-        animate={{ scale: 1.04 }}
-        transition={{ duration: 2.4, ease }}
+        initial={{ scale: 1.06, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.8, ease }}
       >
         <Image
           src="/images/hero-rockies.jpg"
           alt=""
           fill
           priority
+          quality={92}
           sizes="100vw"
           className="object-cover object-[center_30%]"
         />
@@ -127,8 +128,20 @@ export function Hero() {
 /* ---------------- Centered AI section (blue sky, middle of page) ---------------- */
 export function CenterAI() {
   return (
-    <section className="relative overflow-hidden pt-40">
-      <CloudSky id="ai" className="absolute inset-0 h-full w-full" />
+    <section className="relative isolate overflow-hidden pt-40">
+      {/* Painting: "Cloud Study" by John Constable, 1822 (public domain) */}
+      <Image
+        src="/images/backdrops/clouds.jpg"
+        alt=""
+        fill
+        sizes="100vw"
+        className="-z-20 object-cover object-[center_60%]"
+      />
+      {/* Deepens the pale sky so white copy stays legible */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(24,56,86,0.62)_0%,rgba(30,66,98,0.38)_45%,rgba(20,40,60,0.18)_100%)]"
+      />
       <CenterCopy
         badge="Artificial Intelligence"
         title={<>AI built for <Accent>founders.</Accent></>}
@@ -136,20 +149,20 @@ export function CenterAI() {
         cta="Discover RunwayX AI"
         href="/#features"
       />
-      {/* Hand rises from the section's bottom edge; the wrist is cropped by overflow-hidden */}
+      {/* Phone rises from the section's bottom edge; its lower half is cropped by overflow-hidden */}
       <motion.div
-        className="relative z-10 mx-auto -mb-44 mt-16 w-[320px]"
-        initial={{ opacity: 0, y: 80, rotate: 0 }}
-        whileInView={{ opacity: 1, y: 0, rotate: -4 }}
+        className="relative z-10 mx-auto -mb-[230px] mt-16 w-[290px]"
+        initial={{ opacity: 0, y: 80 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 1, delay: 0.2, ease }}
       >
-        <HandPhone screen="ai" label="RunwayX AI CFO chat" />
-        <FloatCard className="-left-32 top-40 -rotate-6">
+        <RisingPhone screen="ai" label="RunwayX AI CFO chat" />
+        <FloatCard className="-left-40 top-56 -rotate-3">
           <p className="text-ink/50">Suggested saving</p>
           <p className="font-semibold">₹9k / month</p>
         </FloatCard>
-        <HandNote light arrow="down-left" className="-right-36 top-6 hidden sm:block">
+        <HandNote light arrow="down-left" className="-right-60 top-6 hidden sm:block">
           your CFO, in your pocket
         </HandNote>
       </motion.div>

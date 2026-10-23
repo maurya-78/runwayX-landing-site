@@ -1,21 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Bot, Check, Flame, Hourglass, Plus, Receipt, ScanLine, Users,
 } from "lucide-react";
 import Reveal from "./Reveal";
-import { FloatCard, HandNote, HandPhone, PhoneMockup, type Screen } from "./Mockups";
+import { FloatCard, HandNote, PhoneMockup, type Screen } from "./Mockups";
 import DemoPlayer from "./Demo";
 import AskAI from "./AskAI";
 import Link from "next/link";
 
-const ease = [0.22, 1, 0.36, 1] as const;
+// Smooth ease-in-out for the FAQ accordion (no snap at either end)
+const FAQ_EASE = [0.65, 0, 0.35, 1] as const;
 
 /** Italic serif accent word inside headlines */
 export function Accent({ children }: { children: React.ReactNode }) {
-  return <em className="font-serif text-[1.12em] font-normal italic tracking-[-0.01em]">{children}</em>;
+  return <em className="font-serif text-[1.02em] font-light italic tracking-[-0.025em]">{children}</em>;
 }
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -25,6 +27,32 @@ function H2({ children, className = "" }: { children: React.ReactNode; className
   return <h2 className={`mt-3 text-4xl font-medium leading-[1.05] tracking-[-0.03em] sm:text-5xl ${className}`}>{children}</h2>;
 }
 
+
+/* ---------------- Painted backdrops ---------------- */
+type Art = { src: string; pos: string };
+
+// Public-domain paintings via Wikimedia Commons, edge-trimmed and resized to 2400px:
+// valley: Bierstadt, Looking Down Yosemite Valley (1865) · sierra: Bierstadt, Among the Sierra Nevada (1868)
+// twilight: Church, Twilight in the Wilderness (1860) · oxbow: Cole, The Oxbow (1836) · clouds: Constable, Cloud Study (1822)
+const ART = {
+  valley: { src: "/images/backdrops/yosemite-down.jpg", pos: "center 45%" },
+  sierra: { src: "/images/backdrops/sierra.jpg", pos: "40% 35%" },
+  twilight: { src: "/images/backdrops/twilight.jpg", pos: "center 40%" },
+  oxbow: { src: "/images/backdrops/oxbow.jpg", pos: "65% center" },
+  clouds: { src: "/images/backdrops/clouds.jpg", pos: "center" },
+} satisfies Record<string, Art>;
+
+/** Panel with a painting behind its content and a soft vignette. */
+function Backdrop({ art, className = "", pos, children }: { art: Art; className?: string; pos?: string; children: React.ReactNode }) {
+  return (
+    // translateZ keeps the rounded clip on its own layer so no image pixels leak at the edges
+    <div className={`relative isolate overflow-hidden [transform:translateZ(0)] ${className}`}>
+      <Image src={art.src} alt="" fill quality={92} sizes="(min-width: 1100px) 1050px, 100vw" className="-z-20 object-cover" style={{ objectPosition: pos ?? art.pos }} />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(120%_90%_at_50%_45%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.25)_100%)]" />
+      {children}
+    </div>
+  );
+}
 
 /* ---------------- Intro + big mockup ---------------- */
 export function Intro() {
@@ -37,8 +65,13 @@ export function Intro() {
           Spreadsheets break, accounting tools are built for accountants. RunwayX is built for founders who need answers in seconds.
         </p>
       </Reveal>
-      <Reveal delay={0.15} className="mt-20">
-        <DemoPlayer />
+      <Reveal delay={0.15} className="mt-16">
+        <Backdrop
+          art={ART.valley}
+          className="rounded-[28px] px-4 pb-20 pt-12 sm:px-7 sm:pt-12"
+        >
+          <DemoPlayer />
+        </Backdrop>
       </Reveal>
     </section>
   );
@@ -107,57 +140,64 @@ const rows = [
  * A different composition per row: in hand, fanned pair, tilted with cards.
  * Notes sit in empty space with arrows pointing at the phone, never on top of it.
  */
+/*
+ * Every visual is 560px tall and sits fully inside its backdrop. Float cards only
+ * overlap the phone's bezel edge, and the note sits in the empty sky above.
+ */
 function RowVisual({ i, label, note }: { i: number; label: string; note: string }) {
   if (i === 0)
     return (
-      // Wrist runs off the bottom of the card (cropped by overflow-hidden)
-      <div className="relative mx-auto -mb-36 w-[270px] pt-20">
-        <HandPhone screen="scan" label={label} className="rotate-[-4deg]" />
-        <FloatCard className="-right-14 top-48 rotate-3">
+      <div className="relative mx-auto h-[620px] w-[250px]">
+        <div className="absolute inset-x-0 bottom-0 -rotate-[3deg]">
+          <PhoneMockup bare screen="scan" label={label} />
+        </div>
+        <FloatCard className="-right-[78px] bottom-[170px] rotate-2">
           <p className="text-ink/50">Auto-filled</p>
           <p className="font-semibold">₹1,300 · Food</p>
         </FloatCard>
-        <HandNote className="-left-12 top-0" arrow="down-right">{note}</HandNote>
+        <HandNote className="-left-14 top-0" arrow="down-right">{note}</HandNote>
       </div>
     );
   if (i === 1)
     return (
-      <div className="relative mx-auto h-[540px] w-[340px]">
-        <div className="absolute left-0 top-[96px] w-[180px] -rotate-[9deg]">
+      <div className="relative mx-auto h-[620px] w-[370px]">
+        <div className="absolute bottom-[16px] left-0 w-[205px] -rotate-[7deg]">
           <PhoneMockup bare screen="home" label="Home screen" />
         </div>
-        <div className="absolute right-0 top-[70px] w-[205px] rotate-[6deg]">
+        <div className="absolute bottom-0 right-0 w-[235px] rotate-[5deg]">
           <PhoneMockup bare screen="runway" label={label} />
         </div>
-        <HandNote className="left-6 top-0" arrow="down-right">{note}</HandNote>
+        <HandNote light className="left-2 top-0" arrow="down-right">{note}</HandNote>
       </div>
     );
   return (
-    <div className="relative mx-auto w-[220px] pt-20">
-      <div className="rotate-[5deg]">
+    <div className="relative mx-auto h-[620px] w-[250px]">
+      <div className="absolute inset-x-0 bottom-0 rotate-[3deg]">
         <PhoneMockup bare screen="team" label={label} />
       </div>
-      <FloatCard className="-left-24 top-56 -rotate-6">
-        <p className="font-semibold">Neha added an expense</p>
-        <p className="text-ink/50">₹4,200 · Team lunch</p>
+      <FloatCard className="-left-[84px] top-[170px] -rotate-2">
+        <p className="text-ink/50">Neha added</p>
+        <p className="font-semibold">₹4,200 · Lunch</p>
       </FloatCard>
-      <FloatCard className="-right-16 bottom-16 rotate-3">
+      <FloatCard className="-right-[80px] bottom-[120px] rotate-2">
         <p className="text-ink/50">Approved by</p>
-        <p className="font-semibold">Aisha (Admin)</p>
+        <p className="font-semibold">Aisha</p>
       </FloatCard>
-      <HandNote className="-left-16 top-0" arrow="down-right">{note}</HandNote>
+      <HandNote className="-left-14 top-0" arrow="down-right">{note}</HandNote>
     </div>
   );
 }
+
+const ROW_ART = [ART.sierra, ART.twilight, ART.oxbow];
 export function Showcase() {
   return (
     <section className="divide-y divide-line border-y border-line">
       {rows.map((r, i) => (
         <div key={r.title} className="grid items-center gap-12 px-6 py-20 sm:px-8 md:grid-cols-2">
           <Reveal className={i % 2 ? "md:order-2" : ""}>
-            <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-[#bfe6f3] to-[#f6f2df] px-6 py-12">
+            <Backdrop art={ROW_ART[i]} className="rounded-3xl px-6 py-10">
               <RowVisual i={i} label={r.label} note={r.note} />
-            </div>
+            </Backdrop>
           </Reveal>
           <Reveal delay={0.1}>
             <Eyebrow>{r.eyebrow}</Eyebrow>
@@ -182,8 +222,8 @@ export function Showcase() {
 
 /* ---------------- How it works ---------------- */
 const steps: { n: string; title: string; body: string; label: string; screen: Screen; tilt: string }[] = [
-  { n: "01", title: "Create your startup", body: "Sign up, add your company and opening funds in under a minute.", label: "Home screen", screen: "home", tilt: "-rotate-6" },
-  { n: "02", title: "Log what you spend", body: "Add expenses or scan receipts. Your team can too.", label: "Expenses screen", screen: "expenses", tilt: "rotate-3" },
+  { n: "01", title: "Create your startup", body: "Sign up, add your company and opening funds in under a minute.", label: "Home screen", screen: "home", tilt: "-rotate-3" },
+  { n: "02", title: "Log what you spend", body: "Add expenses or scan receipts. Your team can too.", label: "Expenses screen", screen: "expenses", tilt: "rotate-2" },
   { n: "03", title: "Watch your runway", body: "Burn, runway and AI insights update automatically.", label: "AI CFO screen", screen: "ai", tilt: "-rotate-2" },
 ];
 export function HowItWorks() {
@@ -200,11 +240,11 @@ export function HowItWorks() {
               <span className="font-serif text-2xl italic text-ink/40">{s.n}</span>
               <h3 className="mt-2 text-xl font-semibold">{s.title}</h3>
               <p className="mt-1.5 text-ink/60">{s.body}</p>
-              <div className="mt-6 h-[300px] overflow-hidden rounded-xl bg-gradient-to-b from-[#e6f1f5] to-paper px-6 pt-8">
-                <div className={`mx-auto w-[190px] transition-transform duration-500 hover:rotate-0 ${s.tilt}`}>
+              <Backdrop art={ART.clouds} pos={["15% 20%", "55% 70%", "90% 35%"][i]} className="mt-6 grid h-[480px] place-items-center rounded-2xl">
+                <div className={`w-[198px] transition-transform duration-500 hover:rotate-0 ${s.tilt}`}>
                   <PhoneMockup bare screen={s.screen} label={s.label} />
                 </div>
-              </div>
+              </Backdrop>
             </div>
           </Reveal>
         ))}
@@ -267,7 +307,6 @@ export function Pricing() {
           </Reveal>
         ))}
       </div>
-      <p className="mt-6 text-center text-xs text-ink/40">Placeholder pricing — update to your real plans.</p>
     </section>
   );
 }
@@ -297,25 +336,47 @@ export function FAQ() {
               <button
                 type="button"
                 aria-expanded={isOpen}
+                aria-controls={`faq-${i}`}
                 onClick={() => setOpen(isOpen ? null : i)}
                 className="flex w-full items-center justify-between gap-4 py-5 text-left font-medium"
               >
                 {f.q}
-                <motion.span animate={{ rotate: isOpen ? 45 : 0 }}>
-                  <Plus className="h-5 w-5 text-ink/50" aria-hidden="true" />
+                <motion.span
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full ring-1 ring-line"
+                  animate={{ rotate: isOpen ? 45 : 0 }}
+                  transition={{ duration: 0.45, ease: FAQ_EASE }}
+                >
+                  <Plus className="h-4 w-4 text-ink/60" aria-hidden="true" />
                 </motion.span>
               </button>
               <AnimatePresence initial={false}>
                 {isOpen && (
-                  <motion.p
+                  // Height animates on a padding-free wrapper, so there's no jump at the end
+                  <motion.div
+                    id={`faq-${i}`}
+                    key="answer"
                     initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease }}
-                    className="overflow-hidden pb-5 text-ink/60"
+                    animate={{
+                      height: "auto",
+                      opacity: 1,
+                      transition: { height: { duration: 0.45, ease: FAQ_EASE }, opacity: { duration: 0.3, delay: 0.08 } },
+                    }}
+                    exit={{
+                      height: 0,
+                      opacity: 0,
+                      transition: { height: { duration: 0.38, ease: FAQ_EASE }, opacity: { duration: 0.18 } },
+                    }}
+                    className="overflow-hidden will-change-[height]"
                   >
-                    {f.a}
-                  </motion.p>
+                    <motion.p
+                      initial={{ y: -6 }}
+                      animate={{ y: 0, transition: { duration: 0.45, ease: FAQ_EASE } }}
+                      exit={{ y: -6, transition: { duration: 0.3, ease: FAQ_EASE } }}
+                      className="max-w-xl pb-5 pr-10 text-ink/60"
+                    >
+                      {f.a}
+                    </motion.p>
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>
