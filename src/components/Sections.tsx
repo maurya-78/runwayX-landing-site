@@ -8,6 +8,7 @@ import {
 import Reveal from "./Reveal";
 import { FloatCard, HandNote, HandPhone, PhoneMockup, type Screen } from "./Mockups";
 import DemoPlayer from "./Demo";
+import AskAI from "./AskAI";
 import Link from "next/link";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -287,7 +288,8 @@ export function FAQ() {
         <Eyebrow>FAQ</Eyebrow>
         <H2>Questions, <Accent>answered.</Accent></H2>
       </Reveal>
-      <div className="divide-y divide-line border-y border-line">
+      <div>
+        <div className="divide-y divide-line border-y border-line">
         {faqs.map((f, i) => {
           const isOpen = open === i;
           return (
@@ -319,6 +321,8 @@ export function FAQ() {
             </div>
           );
         })}
+        </div>
+        <AskAI variant="light" label="Something else? Ask AI" className="mt-6" />
       </div>
     </section>
   );

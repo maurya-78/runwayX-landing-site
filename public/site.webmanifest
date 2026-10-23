@@ -1,0 +1,13 @@
+{
+  "name": "RunwayX: The financial operating system for startups",
+  "short_name": "RunwayX",
+  "description": "Track expenses, monitor burn rate and know your runway. Built for founders.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#f1f1ef",
+  "background_color": "#f1f1ef",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

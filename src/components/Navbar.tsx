@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll, useSpring } from "motion/react";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const links = [
@@ -12,22 +13,24 @@ const links = [
   { href: "/#faq", label: "Resources" },
 ];
 
-/** Asterisk mark + wordmark. The mark spins on hover. */
-export function Logo({ light = false }: { light?: boolean }) {
+/**
+ * Runway mark + wordmark. One artwork everywhere: ink strips with the leaf-green
+ * chevron (same as the favicon). On dark backgrounds (`light`) it sits on the
+ * white logo tile so the colors stay identical. The mark is decorative, so the
+ * wordmark beside it carries the name.
+ */
+export function Logo({ light = false, priority = false }: { light?: boolean; priority?: boolean }) {
   return (
-    <span className={`group flex items-center gap-2 text-[17px] font-medium tracking-[0.01em] ${light ? "text-white" : "text-ink"}`}>
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[18px] w-[18px] transition-transform duration-700 ease-out group-hover:rotate-180"
-        aria-hidden="true"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      >
-        <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1" />
-      </svg>
-      RunwayX
+    <span className={`flex items-center gap-2.5 ${light ? "text-white" : "text-ink"}`}>
+      <Image
+        src={light ? "/logo-tile.png" : "/logo-mark-ink.png"}
+        alt=""
+        width={512}
+        height={512}
+        priority={priority}
+        className="h-9 w-9 shrink-0"
+      />
+      <span className="text-xl font-semibold leading-none tracking-[-0.01em]">RunwayX</span>
     </span>
   );
 }
@@ -71,7 +74,7 @@ export default function Navbar() {
 
         <nav aria-label="Main" className="flex h-[56px] items-center justify-between px-4 sm:px-5">
           <Link href="/#top" aria-label="RunwayX home">
-            <Logo />
+            <Logo priority />
           </Link>
 
           <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center text-[13px] text-ink/75 md:flex" onMouseLeave={() => setHover(null)}>

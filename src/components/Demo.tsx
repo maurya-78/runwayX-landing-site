@@ -31,7 +31,9 @@ function useClock(active: boolean) {
     let raf = 0;
     let last = performance.now();
     const loop = (now: number) => {
-      setT((v) => (v + (now - last)) % TOTAL);
+      // rAF's timestamp can be slightly earlier than performance.now(), so never step backwards
+      const dt = Math.max(0, now - last);
+      setT((v) => (v + dt) % TOTAL);
       last = now;
       raf = requestAnimationFrame(loop);
     };
@@ -53,7 +55,7 @@ export default function DemoPlayer() {
   const setPlaying = (f: (p: boolean) => boolean) => setChoice(f(playing));
 
   const [t, setT] = useClock(playing && inView);
-  const ch = Math.min(CHAPTERS.length - 1, Math.floor(t / CHAPTER_MS));
+  const ch = Math.max(0, Math.min(CHAPTERS.length - 1, Math.floor(t / CHAPTER_MS) || 0));
   const k = KPI[ch];
 
   return (
@@ -189,8 +191,11 @@ export default function DemoPlayer() {
           <p className="text-[14px] font-semibold text-leaf">just now</p>
         </FloatCard>
       </motion.div>
-      <HandNote className="-top-14 right-0 hidden md:block" arrow="down-left">
-        same numbers, everywhere
+      {/* Sits in the empty column above the phone and points straight down at it */}
+      <HandNote className="right-0 top-[64px] hidden w-[122px] text-right md:block" arrow="down">
+        {"same numbers,"}
+        <br />
+        {"everywhere"}
       </HandNote>
     </div>
   );

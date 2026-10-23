@@ -205,9 +205,10 @@ export function FloatCard({ children, className = "" }: { children: React.ReactN
   );
 }
 
-export type ArrowDir = "down-right" | "down-left" | "right" | "left" | "up-right" | "up-left";
+export type ArrowDir = "down" | "down-right" | "down-left" | "right" | "left" | "up-right" | "up-left";
 
 const ARROW_BOX: Record<ArrowDir, string> = {
+  down: "left-1/2 top-full mt-1 h-[58px] w-[30px] -translate-x-1/2",
   "down-right": "left-[55%] top-full mt-1 h-[52px] w-[60px]",
   "down-left": "right-[55%] top-full mt-1 h-[52px] w-[60px] -scale-x-100",
   "up-right": "left-[55%] bottom-full mb-1 h-[52px] w-[60px] -scale-y-100",
@@ -218,10 +219,10 @@ const ARROW_BOX: Record<ArrowDir, string> = {
 
 /** Hand-drawn arrow. The text sits apart from it, so they never overlap. */
 function NoteArrow({ dir }: { dir: ArrowDir }) {
-  const side = dir === "right" || dir === "left";
+  const kind = dir === "down" ? "down" : dir === "right" || dir === "left" ? "side" : "diag";
   return (
     <svg
-      viewBox={side ? "0 0 62 34" : "0 0 60 52"}
+      viewBox={kind === "side" ? "0 0 62 34" : kind === "down" ? "0 0 30 58" : "0 0 60 52"}
       className={`absolute ${ARROW_BOX[dir]}`}
       fill="none"
       stroke="currentColor"
@@ -229,10 +230,15 @@ function NoteArrow({ dir }: { dir: ArrowDir }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {side ? (
+      {kind === "side" ? (
         <>
           <path d="M3 10 C20 2 42 4 55 20" />
           <path d="M54.3 10 L55 20 L45.4 17.3" />
+        </>
+      ) : kind === "down" ? (
+        <>
+          <path d="M17 3 C9 16 22 32 15 50" />
+          <path d="M8 41 L15 51 L22 41" />
         </>
       ) : (
         <>
