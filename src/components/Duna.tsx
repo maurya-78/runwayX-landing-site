@@ -47,7 +47,7 @@ function CenterCopy({
         <Badge>{badge}</Badge>
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.1, ease }}>
-        <T className="mt-4 text-4xl font-medium tracking-[-0.035em] sm:text-[44px] sm:leading-[1.1]">{title}</T>
+        <T className="mt-4 text-[34px] font-medium leading-[1.1] tracking-[-0.035em] min-[400px]:text-4xl sm:text-[44px]">{title}</T>
         <p className="mx-auto mt-4 max-w-[440px] text-[15px] leading-relaxed text-white/85">{body}</p>
       </motion.div>
       <motion.div className="mt-8" initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.2, ease }}>
@@ -82,7 +82,7 @@ export function Hero() {
       {/* Soft fade into the page */}
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-b from-white/0 via-white/80 to-white" />
 
-      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 text-center">
+      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-5 text-center sm:px-6">
         <motion.a
           href="/#features"
           className="group inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-[12px] font-medium text-white backdrop-blur-md transition hover:bg-black/60"
@@ -94,7 +94,7 @@ export function Hero() {
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </motion.a>
         <motion.h1
-          className="mt-6 text-[40px] font-medium leading-[1.05] tracking-[-0.04em] text-ink sm:text-[60px]"
+          className="mt-6 text-[34px] font-medium leading-[1.05] tracking-[-0.04em] text-ink min-[400px]:text-[40px] sm:text-[52px] md:text-[60px]"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4, ease }}
@@ -128,7 +128,7 @@ export function Hero() {
 /* ---------------- Centered AI section (blue sky, middle of page) ---------------- */
 export function CenterAI() {
   return (
-    <section className="relative isolate overflow-hidden pt-40">
+    <section className="relative isolate overflow-hidden pt-24 sm:pt-40">
       {/* Painting: "Cloud Study" by John Constable, 1822 (public domain) */}
       <Image
         src="/images/backdrops/clouds.jpg"
@@ -150,19 +150,20 @@ export function CenterAI() {
         href="/#features"
       />
       {/* Phone rises from the section's bottom edge; its lower half is cropped by overflow-hidden */}
+      {/* Phones: smaller phone, card tucked against its left edge so it stays on screen */}
       <motion.div
-        className="relative z-10 mx-auto -mb-[230px] mt-16 w-[290px]"
+        className="relative z-10 mx-auto -mb-[190px] mt-12 w-[240px] sm:-mb-[230px] sm:mt-16 sm:w-[290px]"
         initial={{ opacity: 0, y: 80 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 1, delay: 0.2, ease }}
       >
         <RisingPhone screen="ai" label="RunwayX AI CFO chat" />
-        <FloatCard className="-left-40 top-56 -rotate-3">
+        <FloatCard className="-left-8 top-44 -rotate-3 sm:-left-40 sm:top-56">
           <p className="text-ink/50">Suggested saving</p>
           <p className="font-semibold">₹9k / month</p>
         </FloatCard>
-        <HandNote light arrow="down-left" className="-right-60 top-6 hidden sm:block">
+        <HandNote light arrow="down-left" className="-right-56 top-6 hidden md:block lg:-right-60">
           your CFO, in your pocket
         </HandNote>
       </motion.div>
@@ -192,7 +193,7 @@ export function Footer() {
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-b from-[#1d3a45]/80 via-[#1d3a45]/30 to-black/70" />
 
       {/* Download CTA */}
-      <div className="pt-28">
+      <div className="pt-20 sm:pt-28">
         <CenterCopy
           badge="Available on Android &amp; iOS"
           title={<>Grow with <Accent>clarity.</Accent></>}
@@ -203,7 +204,7 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="mx-auto w-full max-w-[1100px] px-6 pb-8 pt-20">
+      <div className="mx-auto w-full max-w-[1100px] px-5 pb-8 pt-16 sm:px-6 sm:pt-20">
         <div className="flex flex-col items-center gap-5 border-t border-white/15 pt-8 text-[13px] md:flex-row md:justify-between">
           {/* Left: logo */}
           <Link href="/#top" aria-label="Back to top">

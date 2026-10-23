@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -54,21 +54,52 @@ function Backdrop({ art, className = "", pos, children }: { art: Art; className?
   );
 }
 
+/**
+ * Lays a fixed-size composition out at its design size and scales it down to
+ * fit narrower columns, so phones, cards and notes keep their exact placement
+ * on every screen. Height comes from CSS (aspect-ratio) so it's right before
+ * hydration; only the scale factor needs measuring.
+ */
+function ScaleToFit({ width, height, children }: { width: number; height: number; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setScale(Math.min(1, entry.contentRect.width / width)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [width]);
+
+  return (
+    <div ref={ref} className="relative w-full" style={{ aspectRatio: `${width} / ${height}`, maxHeight: height }}>
+      <div
+        className="absolute left-1/2 top-0"
+        style={{ width, height, transform: `translateX(-50%) scale(${scale})`, transformOrigin: "top center" }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Intro + big mockup ---------------- */
 export function Intro() {
   return (
-    <section className="px-6 py-24 sm:px-8">
-      <Reveal className="mx-auto max-w-2xl text-center">
+    <section className="px-4 py-16 sm:px-8 sm:py-24">
+      <Reveal className="mx-auto max-w-2xl px-2 text-center sm:px-0">
         <Eyebrow>One app for your startup&apos;s money</Eyebrow>
         <H2>Stop guessing. Start seeing where every <Accent>rupee</Accent> goes.</H2>
         <p className="mx-auto mt-5 max-w-lg text-ink/60">
           Spreadsheets break, accounting tools are built for accountants. RunwayX is built for founders who need answers in seconds.
         </p>
       </Reveal>
-      <Reveal delay={0.15} className="mt-16">
+      <Reveal delay={0.15} className="mt-10 sm:mt-16">
+        {/* Extra bottom padding on lg+ makes room for the phone that overlaps the dashboard */}
         <Backdrop
           art={ART.valley}
-          className="rounded-[28px] px-4 pb-20 pt-12 sm:px-7 sm:pt-12"
+          className="rounded-[20px] px-3 pb-8 pt-8 sm:rounded-[28px] sm:px-7 sm:pb-12 sm:pt-12 lg:pb-20"
         >
           <DemoPlayer />
         </Backdrop>
@@ -88,7 +119,7 @@ const grid = [
 ];
 export function Features() {
   return (
-    <section id="features" className="scroll-mt-24 px-6 py-24 sm:px-8">
+    <section id="features" className="scroll-mt-24 px-5 py-16 sm:px-8 sm:py-24">
       <Reveal>
         <Eyebrow>Features</Eyebrow>
         <H2 className="max-w-xl">Everything your startup&apos;s <Accent>finances</Accent> need.</H2>
@@ -96,9 +127,9 @@ export function Features() {
       <div className="mt-12 grid overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3 [&>*]:bg-paper" style={{ gap: 1 }}>
         {grid.map((f, i) => (
           <Reveal key={f.title} delay={i * 0.05}>
-            <div className="group h-full p-7 transition hover:bg-white">
+            <div className="group h-full p-6 transition hover:bg-white sm:p-7">
               <f.icon className="h-6 w-6 text-ink/70 transition group-hover:text-leaf" aria-hidden="true" />
-              <h3 className="mt-8 text-lg font-semibold">{f.title}</h3>
+              <h3 className="mt-6 text-lg font-semibold sm:mt-8">{f.title}</h3>
               <p className="mt-1.5 text-ink/60">{f.body}</p>
             </div>
           </Reveal>
@@ -141,10 +172,24 @@ const rows = [
  * Notes sit in empty space with arrows pointing at the phone, never on top of it.
  */
 /*
- * Every visual is 560px tall and sits fully inside its backdrop. Float cards only
- * overlap the phone's bezel edge, and the note sits in the empty sky above.
+ * Every visual is designed on a 420x620 canvas (phones plus the float cards and
+ * notes around them) and sits fully inside its backdrop. ScaleToFit shrinks the
+ * whole canvas on narrow screens. Float cards only overlap the phone's bezel
+ * edge, and the note sits in the empty sky above.
  */
-function RowVisual({ i, label, note }: { i: number; label: string; note: string }) {
+const ROW_W = 420;
+const ROW_H = 620;
+function RowVisual(props: { i: number; label: string; note: string }) {
+  return (
+    <ScaleToFit width={ROW_W} height={ROW_H}>
+      <div className="flex h-full items-end">
+        <RowComposition {...props} />
+      </div>
+    </ScaleToFit>
+  );
+}
+
+function RowComposition({ i, label, note }: { i: number; label: string; note: string }) {
   if (i === 0)
     return (
       <div className="relative mx-auto h-[620px] w-[250px]">
@@ -193,13 +238,13 @@ export function Showcase() {
   return (
     <section className="divide-y divide-line border-y border-line">
       {rows.map((r, i) => (
-        <div key={r.title} className="grid items-center gap-12 px-6 py-20 sm:px-8 md:grid-cols-2">
-          <Reveal className={i % 2 ? "md:order-2" : ""}>
-            <Backdrop art={ROW_ART[i]} className="rounded-3xl px-6 py-10">
+        <div key={r.title} className="grid items-center gap-10 px-4 py-14 sm:px-8 sm:py-20 lg:grid-cols-2 lg:gap-12">
+          <Reveal className={i % 2 ? "lg:order-2" : ""}>
+            <Backdrop art={ROW_ART[i]} className="rounded-[20px] px-2 py-8 sm:rounded-3xl sm:px-6 sm:py-10">
               <RowVisual i={i} label={r.label} note={r.note} />
             </Backdrop>
           </Reveal>
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="px-1 sm:px-0">
             <Eyebrow>{r.eyebrow}</Eyebrow>
             <H2>{r.title}</H2>
             <p className="mt-5 max-w-md text-ink/60">{r.body}</p>
@@ -228,20 +273,25 @@ const steps: { n: string; title: string; body: string; label: string; screen: Sc
 ];
 export function HowItWorks() {
   return (
-    <section id="how" className="scroll-mt-24 px-6 py-24 sm:px-8">
+    <section id="how" className="scroll-mt-24 px-5 py-16 sm:px-8 sm:py-24">
       <Reveal className="text-center">
         <Eyebrow>How it works</Eyebrow>
         <H2>Up and running in <Accent>three</Accent> steps.</H2>
       </Reveal>
-      <div className="mt-14 grid gap-6 md:grid-cols-3">
+      {/* Two columns on tablets (third card spans both), staggered three-up on desktop */}
+      <div className="mt-10 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {steps.map((s, i) => (
-          <Reveal key={s.n} delay={i * 0.1} className={["md:mt-16", "md:mt-8", "md:mt-0"][i]}>
-            <div className="h-full rounded-2xl border border-line bg-white p-6 transition-shadow hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.25)]">
+          <Reveal
+            key={s.n}
+            delay={i * 0.1}
+            className={["lg:mt-16", "lg:mt-8", "md:col-span-2 lg:col-span-1 lg:mt-0"][i]}
+          >
+            <div className="h-full rounded-2xl border border-line bg-white p-5 transition-shadow hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.25)] sm:p-6">
               <span className="font-serif text-2xl italic text-ink/40">{s.n}</span>
               <h3 className="mt-2 text-xl font-semibold">{s.title}</h3>
               <p className="mt-1.5 text-ink/60">{s.body}</p>
-              <Backdrop art={ART.clouds} pos={["15% 20%", "55% 70%", "90% 35%"][i]} className="mt-6 grid h-[480px] place-items-center rounded-2xl">
-                <div className={`w-[198px] transition-transform duration-500 hover:rotate-0 ${s.tilt}`}>
+              <Backdrop art={ART.clouds} pos={["15% 20%", "55% 70%", "90% 35%"][i]} className="mt-6 grid h-[420px] place-items-center rounded-2xl sm:h-[480px]">
+                <div className={`w-[176px] transition-transform duration-500 hover:rotate-0 sm:w-[198px] ${s.tilt}`}>
                   <PhoneMockup bare screen={s.screen} label={s.label} />
                 </div>
               </Backdrop>
@@ -262,10 +312,15 @@ export function Stats() {
     { v: "100%", l: "of spend visible" },
   ];
   return (
-    <section className="grid grid-cols-2 divide-x divide-y divide-line border-b border-line md:grid-cols-4 md:divide-y-0">
+    // Explicit borders per cell: a 2x2 grid on phones, one row of four from md
+    <section className="grid grid-cols-2 border-b border-line md:grid-cols-4">
       {s.map((x, i) => (
-        <Reveal key={x.l} delay={i * 0.06} className="px-6 py-12 sm:px-8">
-          <p className="text-5xl font-medium tracking-[-0.04em]">{x.v}</p>
+        <Reveal
+          key={x.l}
+          delay={i * 0.06}
+          className={`border-line px-5 py-10 sm:px-8 sm:py-12 ${i % 2 === 0 ? "border-r" : ""} ${i === 1 ? "md:border-r" : ""} ${i >= 2 ? "border-t md:border-t-0" : ""}`}
+        >
+          <p className="text-4xl font-medium tracking-[-0.04em] sm:text-5xl">{x.v}</p>
           <p className="mt-2 text-sm text-ink/55">{x.l}</p>
         </Reveal>
       ))}
@@ -281,15 +336,15 @@ const plans = [
 ];
 export function Pricing() {
   return (
-    <section id="pricing" className="scroll-mt-24 border-t border-line px-6 py-24 sm:px-8">
+    <section id="pricing" className="scroll-mt-24 border-t border-line px-5 py-16 sm:px-8 sm:py-24">
       <Reveal className="text-center">
         <Eyebrow>Pricing</Eyebrow>
         <H2>Simple pricing that <Accent>grows</Accent> with you.</H2>
       </Reveal>
-      <div className="mt-12 grid gap-5 md:grid-cols-3">
+      <div className="mx-auto mt-10 grid max-w-md gap-5 sm:mt-12 md:max-w-none md:grid-cols-3 md:gap-4 lg:gap-5">
         {plans.map((p, i) => (
           <Reveal key={p.name} delay={i * 0.08}>
-            <div className={`flex h-full flex-col rounded-2xl border p-7 ${p.hot ? "border-ink bg-ink text-white" : "border-line bg-white"}`}>
+            <div className={`flex h-full flex-col rounded-2xl border p-6 lg:p-7 ${p.hot ? "border-ink bg-ink text-white" : "border-line bg-white"}`}>
               <p className="text-sm font-semibold">{p.name}</p>
               <p className="mt-4 text-4xl font-medium tracking-tight">{p.price}</p>
               <p className={`text-sm ${p.hot ? "text-white/55" : "text-ink/50"}`}>{p.note}</p>
@@ -322,7 +377,7 @@ const faqs = [
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section id="faq" className="scroll-mt-24 grid gap-10 border-t border-line px-6 py-24 sm:px-8 md:grid-cols-[1fr_1.4fr]">
+    <section id="faq" className="scroll-mt-24 grid gap-8 border-t border-line px-5 py-16 sm:px-8 sm:py-24 md:grid-cols-[1fr_1.4fr] md:gap-10">
       <Reveal>
         <Eyebrow>FAQ</Eyebrow>
         <H2>Questions, <Accent>answered.</Accent></H2>
@@ -372,7 +427,7 @@ export function FAQ() {
                       initial={{ y: -6 }}
                       animate={{ y: 0, transition: { duration: 0.45, ease: FAQ_EASE } }}
                       exit={{ y: -6, transition: { duration: 0.3, ease: FAQ_EASE } }}
-                      className="max-w-xl pb-5 pr-10 text-ink/60"
+                      className="max-w-xl pb-5 pr-4 text-ink/60 sm:pr-10"
                     >
                       {f.a}
                     </motion.p>

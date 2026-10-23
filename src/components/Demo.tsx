@@ -77,27 +77,30 @@ export default function DemoPlayer() {
   const k = KPI[ch];
 
   return (
-    <div ref={ref} className="relative md:pr-44">
+    // The synced phone overlaps the dashboard only on desktop; tablets get the full-width dashboard
+    <div ref={ref} className="relative lg:pr-44">
       {/* Desktop "recording" */}
       <div className="overflow-hidden rounded-[18px] bg-white text-ink tabular-nums shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.06),0_40px_80px_-24px_rgba(10,16,28,0.55)]">
         {/* Window chrome */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-black/[0.06] bg-[#f7f7f5] px-4 py-2.5">
-          <span className="flex gap-2">
-            <span className="h-3 w-3 rounded-full bg-[#ff5f57] ring-1 ring-inset ring-black/10" />
-            <span className="h-3 w-3 rounded-full bg-[#febc2e] ring-1 ring-inset ring-black/10" />
-            <span className="h-3 w-3 rounded-full bg-[#28c840] ring-1 ring-inset ring-black/10" />
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-black/[0.06] bg-[#f7f7f5] px-3 py-2 sm:px-4 sm:py-2.5">
+          <span className="flex gap-1.5 sm:gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57] ring-1 ring-inset ring-black/10 sm:h-3 sm:w-3" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e] ring-1 ring-inset ring-black/10 sm:h-3 sm:w-3" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#28c840] ring-1 ring-inset ring-black/10 sm:h-3 sm:w-3" />
           </span>
-          <span className="flex w-[min(320px,40vw)] items-center justify-center gap-1.5 rounded-[8px] bg-white px-3 py-1 text-[13px] text-ink/55 ring-1 ring-black/[0.06]">
-            <Lock className="h-3 w-3" aria-hidden="true" /> app.runwayx.com/overview
+          <span className="flex w-[min(320px,44vw)] min-w-0 items-center justify-center gap-1.5 rounded-[8px] bg-white px-2 py-1 text-[11px] text-ink/55 ring-1 ring-black/[0.06] sm:px-3 sm:text-[13px]">
+            <Lock className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="truncate">app.runwayx.com/overview</span>
           </span>
-          <span className="flex items-center justify-end gap-1.5 text-[12.5px] font-medium text-[#e5484d]">
+          <span className="flex items-center justify-end gap-1.5 text-[11.5px] font-medium text-[#e5484d] sm:text-[12.5px]">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#e5484d]" /> Demo
           </span>
         </div>
 
-        <div className="relative grid aspect-[16/10] grid-cols-[1fr] sm:grid-cols-[176px_1fr]">
+        {/* Phones: natural height, stacked. sm+: a fixed 16:10 "screen"; the sidebar joins at xl */}
+        <div className="relative grid grid-cols-[1fr] sm:aspect-[16/10] xl:grid-cols-[176px_1fr]">
           {/* Sidebar */}
-          <aside className="hidden flex-col border-r border-black/[0.06] bg-[#fafaf8] p-3 text-[13.5px] sm:flex">
+          <aside className="hidden flex-col border-r border-black/[0.06] bg-[#fafaf8] p-3 text-[13.5px] xl:flex">
             <div className="flex items-center gap-2 rounded-[10px] px-2 py-1.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-mark-ink.png" alt="" className="h-5 w-5" />
@@ -128,36 +131,38 @@ export default function DemoPlayer() {
             </div>
           </aside>
 
-          <div className="flex min-w-0 flex-col gap-3 p-4 sm:p-5">
+          <div className="flex min-w-0 flex-col gap-2.5 p-3 sm:gap-3 sm:p-5">
             {/* Page header */}
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-[12.5px] text-ink/45">Acme Labs</p>
-                <p className="text-[18px] font-semibold leading-tight tracking-[-0.025em]">Overview</p>
+                <p className="text-[12px] text-ink/45 sm:text-[12.5px]">Acme Labs</p>
+                <p className="text-[16px] font-semibold leading-tight tracking-[-0.025em] sm:text-[18px]">Overview</p>
               </div>
               <span className="hidden items-center gap-1.5 rounded-[9px] px-2.5 py-1.5 text-[13px] font-medium text-ink/60 ring-1 ring-black/[0.08] md:flex">
                 <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> Last 12 months
               </span>
-              <span className="flex items-center gap-1.5 rounded-[9px] bg-ink px-2.5 py-1.5 text-[13px] font-semibold text-white">
+              <span className="flex shrink-0 items-center gap-1.5 rounded-[9px] bg-ink px-2.5 py-1.5 text-[12px] font-semibold text-white sm:text-[13px]">
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" /> Add expense
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <Kpi label="Runway" value={`${k.runway} mo`} hot={ch === 2} delta={ch >= 2 ? "−1.6 mo" : "+2.0 mo"} good={ch < 2} />
-              <Kpi label="Monthly burn" value={k.burn} hot={ch === 1} delta={ch >= 1 ? "+9.5%" : "+3.1%"} good={false} />
-              <Kpi label="Cash in bank" value={k.cash} hot={ch === 1} delta="−0.5%" good />
+              <Kpi label="Monthly burn" short="Burn" value={k.burn} hot={ch === 1} delta={ch >= 1 ? "+9.5%" : "+3.1%"} good={false} />
+              <Kpi label="Cash in bank" short="Cash" value={k.cash} hot={ch === 1} delta="−0.5%" good />
             </div>
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[1.45fr_1fr]">
-              <div className="flex min-h-0 flex-col rounded-[14px] p-4 ring-1 ring-black/[0.07]">
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-2.5 sm:gap-3 lg:grid-cols-[1.45fr_1fr]">
+              {/* Fixed height on phones, where the grid has no aspect ratio to fill */}
+              <div className="flex h-[190px] min-h-0 flex-col rounded-[14px] p-3 ring-1 ring-black/[0.07] sm:h-auto sm:p-4">
                 <div className="flex items-baseline justify-between">
                   <p className="text-[13px] font-semibold tracking-[-0.01em]">Monthly burn</p>
                   <p className="text-[12px] text-ink/40">₹ lakh</p>
                 </div>
                 <BurnChart last={k.last} />
               </div>
-              <div className="relative hidden min-h-0 overflow-hidden rounded-[14px] p-4 ring-1 ring-black/[0.07] lg:block">
+              {/* Chapter panel: shown on phones (stacked) and desktop; no room for it at sm/md */}
+              <div className="relative h-[256px] min-h-0 overflow-hidden rounded-[14px] p-3 ring-1 ring-black/[0.07] sm:hidden lg:block lg:h-auto lg:p-4">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={ch}
@@ -176,8 +181,8 @@ export default function DemoPlayer() {
         </div>
 
         {/* Player controls */}
-        {/* Right padding on md+ keeps the timecode clear of the overlapping phone */}
-        <div className="flex items-center gap-3 border-t border-black/[0.06] bg-[#f7f7f5] px-4 py-2.5 md:pr-20">
+        {/* Right padding on lg+ keeps the timecode clear of the overlapping phone */}
+        <div className="flex items-center gap-3 border-t border-black/[0.06] bg-[#f7f7f5] px-3 py-2.5 sm:px-4 lg:pr-20">
           <button
             type="button"
             onClick={() => setPlaying((p) => !p)}
@@ -213,7 +218,7 @@ export default function DemoPlayer() {
 
       {/* Phone in sync */}
       <motion.div
-        className="absolute -bottom-10 right-0 hidden w-[232px] md:block"
+        className="absolute -bottom-10 right-0 hidden w-[232px] lg:block"
         initial={{ rotate: 0, y: 40 }}
         whileInView={{ rotate: 6, y: 0 }}
         viewport={{ once: true }}
@@ -232,7 +237,7 @@ export default function DemoPlayer() {
         </PhoneMockup>
       </motion.div>
       {/* Sits in the empty column above the phone and points straight down at it */}
-      <HandNote light className="right-0 top-[56px] hidden w-[122px] text-right md:block" arrow="down">
+      <HandNote light className="right-0 top-[56px] hidden w-[122px] text-right lg:block" arrow="down">
         {"same numbers,"}
         <br />
         {"everywhere"}
@@ -241,10 +246,20 @@ export default function DemoPlayer() {
   );
 }
 
-function Kpi({ label, value, hot, delta, good }: { label: string; value: string; hot?: boolean; delta: string; good: boolean }) {
+function Kpi({ label, short, value, hot, delta, good }: { label: string; short?: string; value: string; hot?: boolean; delta: string; good: boolean }) {
   return (
-    <div className={`rounded-[14px] p-3 ring-1 transition-colors duration-500 sm:p-3.5 ${hot ? "bg-[#fffbea] ring-[#ecd58b]" : "ring-black/[0.07]"}`}>
-      <p className="text-[12.5px] font-medium text-ink/50">{label}</p>
+    <div className={`min-w-0 rounded-[12px] p-2.5 ring-1 transition-colors duration-500 sm:rounded-[14px] sm:p-3.5 ${hot ? "bg-[#fffbea] ring-[#ecd58b]" : "ring-black/[0.07]"}`}>
+      {/* Short label on phones, where three cards share ~90px each */}
+      <p className="truncate text-[11.5px] font-medium text-ink/50 sm:text-[12.5px]">
+        {short ? (
+          <>
+            <span className="sm:hidden">{short}</span>
+            <span className="hidden sm:inline">{label}</span>
+          </>
+        ) : (
+          label
+        )}
+      </p>
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.p
           key={value}
@@ -252,12 +267,12 @@ function Kpi({ label, value, hot, delta, good }: { label: string; value: string;
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -12, opacity: 0 }}
           transition={{ duration: 0.35, ease }}
-          className="mt-1 text-[19px] font-semibold tracking-[-0.03em] sm:text-[23px]"
+          className="mt-1 whitespace-nowrap text-[16px] font-semibold tracking-[-0.03em] sm:text-[19px] lg:text-[23px]"
         >
           {value}
         </motion.p>
       </AnimatePresence>
-      <span className={`mt-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[11.5px] font-semibold ${good ? "bg-[#e8f6ec] text-[#1c7a3d]" : "bg-[#fdecec] text-[#c2352f]"}`}>
+      <span className={`mt-1 inline-flex items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-px text-[10.5px] font-semibold sm:text-[11.5px] ${good ? "bg-[#e8f6ec] text-[#1c7a3d]" : "bg-[#fdecec] text-[#c2352f]"}`}>
         <ArrowUpRight className={`h-2.5 w-2.5 ${delta.startsWith("−") ? "rotate-90" : ""}`} strokeWidth={2.8} aria-hidden="true" />
         {delta}
       </span>
@@ -271,7 +286,8 @@ function BurnChart({ last }: { last: number }) {
   const max = 6;
   return (
     // Axis column + plot column; month labels share the plot column so they line up with the bars
-    <div className="mt-6 grid min-h-0 flex-1 grid-cols-[16px_1fr] grid-rows-[1fr_auto] gap-x-2">
+    // minmax(0,1fr): month labels must not widen the plot past the card on narrow screens
+    <div className="mt-6 grid min-h-0 flex-1 grid-cols-[16px_minmax(0,1fr)] grid-rows-[1fr_auto] gap-x-2">
         <div className="flex flex-col justify-between text-right text-[11px] leading-none text-ink/35">
           {[6, 4, 2, 0].map((v) => (
             <span key={v} className="-my-[5px]">{v}</span>
@@ -290,7 +306,8 @@ function BurnChart({ last }: { last: number }) {
                 style={{ height: `${(v / max) * 100}%` }}
               >
                 {isLast && (
-                  <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[6px] bg-ink px-1.5 py-0.5 text-[11.5px] font-semibold text-white">
+                  // Anchored to the bar's right edge (it's always the last bar) so it never pokes past the card
+                  <span className="absolute -top-7 right-0 whitespace-nowrap rounded-[6px] bg-ink px-1.5 py-0.5 text-[11.5px] font-semibold text-white">
                     ₹{v.toFixed(1)}L
                   </span>
                 )}
@@ -299,9 +316,15 @@ function BurnChart({ last }: { last: number }) {
           })}
         </div>
       <span />
-      <div className="mt-1.5 flex gap-[5px] text-[11px] text-ink/35">
-        {MONTHS_12.map((m) => (
-          <span key={m} className="min-w-0 flex-1 overflow-hidden text-center">{m}</span>
+      <div className="mt-1.5 flex gap-[5px] text-[9px] text-ink/35 sm:text-[11px]">
+        {/* Phones: every other month, allowed to spill into its hidden neighbour's slot */}
+        {MONTHS_12.map((m, i) => (
+          <span
+            key={m}
+            className={`min-w-0 flex-1 overflow-hidden text-center max-sm:overflow-visible ${i % 2 ? "max-sm:invisible" : ""}`}
+          >
+            {m}
+          </span>
         ))}
       </div>
     </div>

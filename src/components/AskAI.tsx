@@ -130,7 +130,8 @@ export default function AskAI({
   };
 
   return (
-    <div className={`flex items-center gap-2.5 whitespace-nowrap ${className}`}>
+    // Wraps the buttons under the label only on very narrow screens
+    <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-2 whitespace-nowrap ${className}`}>
       {/* Label, status and a hidden sizer share one grid cell, so nothing ever shifts */}
       <span className={`grid shrink-0 text-[12px] font-medium leading-5 md:text-[13px] ${v.text}`}>
         <span className={`[grid-area:1/1] motion-safe:transition-opacity ${status ? "opacity-0" : ""}`}>{label}</span>

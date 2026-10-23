@@ -28,9 +28,9 @@ export function Logo({ light = false, priority = false }: { light?: boolean; pri
         width={512}
         height={512}
         priority={priority}
-        className={light ? "h-10 w-10 shrink-0" : "h-9 w-9 shrink-0"}
+        className={light ? "h-10 w-10 shrink-0" : "h-8 w-8 shrink-0 sm:h-9 sm:w-9"}
       />
-      <span className="text-[22px] font-semibold leading-none tracking-[-0.03em]">RunwayX</span>
+      <span className="text-[20px] font-semibold leading-none tracking-[-0.03em] sm:text-[22px]">RunwayX</span>
     </span>
   );
 }
@@ -70,7 +70,7 @@ export default function Navbar() {
         {/* Glass sheen */}
         <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
 
-        <nav aria-label="Main" className="flex h-[60px] items-center justify-between px-4 sm:px-5">
+        <nav aria-label="Main" className="flex h-[56px] items-center justify-between gap-2 px-3 sm:h-[60px] sm:px-5">
           <Link href="/#top" aria-label="RunwayX home">
             <Logo priority />
           </Link>
@@ -82,7 +82,7 @@ export default function Navbar() {
                   href={l.href}
                   onMouseEnter={() => setHover(l.label)}
                   onFocus={() => setHover(l.label)}
-                  className="relative z-10 block px-4 py-2 transition-colors hover:text-ink"
+                  className="relative z-10 block whitespace-nowrap px-3 py-2 transition-colors hover:text-ink lg:px-4"
                 >
                   {l.label}
                 </Link>
@@ -100,7 +100,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <Link
               href="/#download"
-              className="group relative overflow-hidden rounded-[11px] bg-[#140d0b] px-4 py-2.5 text-[14.5px] font-semibold tracking-[-0.01em] text-white transition hover:bg-black/85"
+              className="group relative overflow-hidden whitespace-nowrap rounded-[11px] bg-[#140d0b] px-3 py-2 text-[13.5px] font-semibold tracking-[-0.01em] text-white transition hover:bg-black/85 sm:px-4 sm:py-2.5 sm:text-[14.5px]"
             >
               <span className="relative z-10">Get the app</span>
               {/* Shine sweep */}
@@ -111,12 +111,12 @@ export default function Navbar() {
             </Link>
             <button
               type="button"
-              className="grid h-9 w-9 place-items-center rounded-lg text-ink/70 hover:bg-black/5 md:hidden"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-ink/70 hover:bg-black/5 md:hidden"
               aria-expanded={open}
               aria-label={open ? "Close menu" : "Open menu"}
               onClick={() => setOpen((o) => !o)}
             >
-              {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </nav>
@@ -131,7 +131,7 @@ export default function Navbar() {
             >
               {links.map((l) => (
                 <li key={l.label}>
-                  <Link href={l.href} onClick={() => setOpen(false)} className="block py-3 text-sm text-ink/70">
+                  <Link href={l.href} onClick={() => setOpen(false)} className="block py-3 text-[15px] font-medium text-ink/70 transition-colors hover:text-ink">
                     {l.label}
                   </Link>
                 </li>
