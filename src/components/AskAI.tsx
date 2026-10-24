@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 
 /**
  * "Ask AI about RunwayX": a label plus four round icon-only buttons that open
  * ChatGPT, Claude, Gemini or DeepSeek in a new tab with a neutral prompt.
  * Every click also copies the prompt to the clipboard, because Gemini and
  * DeepSeek don't reliably accept a prefilled prompt from the URL.
- * Used in the footer (dark variant) and the FAQ (light variant).
+ * Used in the footer (`summary` variant) and the FAQ (`card` variant).
  * Brand logos: @lobehub/icons-static-svg 1.98.0 (MIT).
  */
 export const AI_PROMPT =
@@ -83,30 +84,23 @@ const ASSISTANTS: readonly Assistant[] = [
 const MESSAGES = { copied: "Prompt copied", failed: "Couldn't copy prompt" } as const;
 type Status = "" | keyof typeof MESSAGES;
 
-const VARIANTS = {
-  dark: {
-    text: "text-white/85",
-    button: "ring-1 ring-white/30 focus-visible:outline-white",
-    tip: "bg-white text-ink",
-  },
-  light: {
-    text: "text-ink/70",
-    button: "ring-1 ring-ink/25 hover:ring-ink/50 focus-visible:outline-ink",
-    tip: "bg-ink text-white",
-  },
-} as const;
-
+/**
+ * Two deliberately different looks:
+ * - `summary` (footer): one frosted-glass capsule, label then bare icons
+ *   separated by a hairline, with a tooltip above each icon.
+ * - `card` (FAQ): a bordered panel styled like a chat composer, showing the
+ *   prompt that will be sent and labelled assistant chips.
+ */
 export default function AskAI({
-  variant = "light",
+  variant = "card",
   label = "Ask AI about RunwayX",
   className = "",
 }: {
-  variant?: keyof typeof VARIANTS;
+  variant?: "summary" | "card";
   label?: string;
   className?: string;
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  const v = VARIANTS[variant];
   const [status, setStatus] = useState<Status>("");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -129,37 +123,81 @@ export default function AskAI({
     );
   };
 
+  const linkProps = (name: string, href: string) => ({
+    href,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    onClick: copyPrompt,
+    "aria-label": `Ask ${name} about RunwayX (opens in a new tab)`,
+  });
+
+  if (variant === "summary") {
+    return (
+      <div
+        className={`liquid-glass inline-flex items-center gap-3 whitespace-nowrap rounded-full py-1.5 pl-4 pr-1.5 text-white ${className}`}
+        data-scrolled="false"
+      >
+        {/* Label, status and a hidden sizer share one grid cell, so nothing ever shifts */}
+        <span className="grid text-[12px] font-semibold leading-5 min-[400px]:text-[13px] sm:text-[14px] [text-shadow:0_1px_8px_rgba(0,0,0,0.3)]">
+          <span className={`[grid-area:1/1] motion-safe:transition-opacity ${status ? "opacity-0" : ""}`}>{label}</span>
+          <span role="status" aria-live="polite" className="[grid-area:1/1]">
+            {status && MESSAGES[status]}
+          </span>
+          <span aria-hidden="true" className="invisible [grid-area:1/1]">{label}</span>
+        </span>
+        <span aria-hidden="true" className="h-5 w-px bg-white/35" />
+        <ul className="flex items-center">
+          {ASSISTANTS.map(({ name, href, Icon }) => (
+            <li key={name} className="group relative">
+              <a
+                {...linkProps(name, href)}
+                className="grid h-8 w-8 place-items-center rounded-full text-white transition hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white [&_svg]:h-[18px] [&_svg]:w-[18px]"
+              >
+                <Icon uid={uid} />
+              </a>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-ink opacity-0 shadow-md group-hover:opacity-100 group-focus-within:opacity-100 motion-safe:transition-opacity"
+              >
+                {name}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  // card: chat-composer panel with the prompt preview and labelled chips
   return (
-    // Wraps the buttons under the label only on very narrow screens
-    <div className={`flex flex-wrap items-center gap-x-2.5 gap-y-2 whitespace-nowrap ${className}`}>
-      {/* Label, status and a hidden sizer share one grid cell, so nothing ever shifts */}
-      <span className={`grid shrink-0 text-[12px] font-medium leading-5 md:text-[13px] ${v.text}`}>
-        <span className={`[grid-area:1/1] motion-safe:transition-opacity ${status ? "opacity-0" : ""}`}>{label}</span>
-        <span role="status" aria-live="polite" className="[grid-area:1/1]">
+    <div className={`rounded-2xl border border-line bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] sm:p-5 ${className}`}>
+      <div className="flex items-center gap-2">
+        <span aria-hidden="true" className="grid h-7 w-7 place-items-center rounded-lg bg-[#9be15d]/25 text-leaf">
+          <Sparkles className="h-4 w-4" />
+        </span>
+        <p className="text-[14px] font-semibold tracking-[-0.01em] text-ink">{label}</p>
+        <span role="status" aria-live="polite" className="ml-auto text-[12px] font-medium text-leaf">
           {status && MESSAGES[status]}
         </span>
-        <span aria-hidden="true" className="invisible [grid-area:1/1]">{MESSAGES.failed}</span>
-      </span>
+      </div>
 
-      <ul className="flex shrink-0 items-center gap-1.5">
+      {/* Prompt preview, styled like a chat input */}
+      <p className="mt-3 rounded-xl bg-paper px-3.5 py-2.5 text-[13px] leading-relaxed text-ink/55">
+        <span className="sr-only">Prompt that will be sent: </span>
+        <span className="line-clamp-2">{AI_PROMPT}</span>
+      </p>
+
+      <ul className="mt-3 flex flex-wrap gap-2">
         {ASSISTANTS.map(({ name, href, Icon }) => (
-          <li key={name} className="group relative">
+          <li key={name}>
             <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={copyPrompt}
-              aria-label={`Ask ${name} about RunwayX (opens in a new tab)`}
-              className={`grid h-8 w-8 place-items-center rounded-full bg-white text-black shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 motion-safe:transition motion-safe:hover:-translate-y-0.5 hover:shadow-md ${v.button}`}
+              {...linkProps(name, href)}
+              className="group inline-flex items-center gap-2 rounded-lg border border-line bg-white py-1.5 pl-2 pr-2.5 text-[13px] font-medium text-ink/80 transition hover:border-ink/25 hover:bg-paper hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             >
               <Icon uid={uid} />
-            </a>
-            <span
-              aria-hidden="true"
-              className={`pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 rounded-md px-2 py-1 text-[11px] font-medium opacity-0 shadow-md group-hover:opacity-100 group-focus-within:opacity-100 motion-safe:transition-opacity ${v.tip}`}
-            >
               {name}
-            </span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-ink/35 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink/70" aria-hidden="true" />
+            </a>
           </li>
         ))}
       </ul>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { ChevronRight } from "lucide-react";
-import { Logo } from "./Navbar";
+import { MetalButton } from "./ui/MetalButton";
 import { FloatCard, HandNote, RisingPhone } from "./Mockups";
 import { Accent } from "./Sections";
 import Link from "next/link";
@@ -57,14 +57,33 @@ function CenterCopy({
   );
 }
 
+/*
+ * Duna-style painted edge: the painting is opaque at the top and dissolves into
+ * the page along an uneven, brushed line (lower on the left, higher on the
+ * right). The SVG is used as a CSS mask; turbulence roughens the edge and the
+ * blur feathers it.
+ */
+const HERO_MASK = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" preserveAspectRatio="none">
+    <filter id="f" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="3" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" scale="70"/>
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <path filter="url(#f)" fill="#fff" d="M-60 -60H1500V560C1390 590 1300 560 1190 610C1080 660 1000 640 900 680C800 720 710 690 610 720C510 750 430 735 340 765C240 795 150 790 60 815L-60 840Z"/>
+  </svg>`,
+)}")`;
+
 /* ---------------- Hero ---------------- */
 export function Hero() {
   return (
-    <section id="top" className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-white pb-16 pt-[60px] sm:pb-20">
+    <section id="top" className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-white pb-12 pt-[60px] sm:pb-14">
       {/* Painting: "The Rocky Mountains, Lander's Peak" by Albert Bierstadt (public domain) */}
-      {/* Settles to scale 1, so the painting ends at native sharpness (no lasting upscale) */}
+      {/* Full colour across the top ~3/4 of the screen, then a brushed edge into white */}
       <motion.div
-        className="absolute inset-0"
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-[74%] sm:h-[80%]"
+        style={{ maskImage: HERO_MASK, WebkitMaskImage: HERO_MASK, maskSize: "100% 100%", WebkitMaskSize: "100% 100%" }}
         initial={{ scale: 1.06, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1.8, ease }}
@@ -76,16 +95,14 @@ export function Hero() {
           priority
           quality={92}
           sizes="100vw"
-          className="object-cover object-[center_30%]"
+          className="object-cover object-[center_35%]"
         />
       </motion.div>
-      {/* Soft fade into the page */}
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-b from-white/0 via-white/80 to-white" />
 
       <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-5 text-center sm:px-6">
         <motion.a
           href="/#features"
-          className="group inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-[12px] font-medium text-white backdrop-blur-md transition hover:bg-black/60"
+          className="group inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-[12px] font-semibold text-white backdrop-blur-md transition hover:bg-black/60 sm:text-[13px]"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.3, ease }}
@@ -94,7 +111,7 @@ export function Hero() {
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </motion.a>
         <motion.h1
-          className="mt-6 text-[34px] font-medium leading-[1.05] tracking-[-0.04em] text-ink min-[400px]:text-[40px] sm:text-[52px] md:text-[60px]"
+          className="mt-6 text-[36px] font-medium leading-[1.02] tracking-[-0.045em] text-ink min-[400px]:text-[42px] sm:text-[58px] md:text-[70px]"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4, ease }}
@@ -104,22 +121,27 @@ export function Hero() {
           not just your <Accent>spend</Accent>
         </motion.h1>
         <motion.p
-          className="mx-auto mt-5 max-w-[520px] text-[16px] leading-relaxed text-ink/65 sm:text-[17px]"
+          className="mx-auto mt-6 max-w-[620px] text-[17px] leading-[1.5] tracking-[-0.01em] text-ink/50 sm:text-[21px]"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5, ease }}
         >
           RunwayX tracks every expense, calculates burn and runway in real time, and gives your team an AI CFO, all in one app.
         </motion.p>
-        <motion.a
-          href="/#download"
-          className="mt-8 inline-flex items-center rounded-full bg-[#140d0b] px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-black/80"
+        <motion.div
+          className="mt-10"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.6, ease }}
         >
-          Get the app
-        </motion.a>
+          <MetalButton
+            href="/#download"
+            metalFxClassName="bg-[#140d0b] text-white shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] hover:bg-black"
+            className="px-6 py-3 text-[16px] font-semibold tracking-[-0.01em] sm:px-7 sm:py-3.5 sm:text-[18px]"
+          >
+            Get the app
+          </MetalButton>
+        </motion.div>
       </div>
     </section>
   );
@@ -171,63 +193,112 @@ export function CenterAI() {
   );
 }
 
-/* ---------------- Footer ---------------- */
+/* ---------------- Footer (Duna layout: link columns over the sky, legal bar over the land) ---------------- */
+type FooterLink = { href: string; label: string; external?: boolean };
+
+const footerColumns: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Product",
+    links: [
+      { href: "/#features", label: "Features" },
+      { href: "/#how", label: "How it works" },
+      { href: "/#pricing", label: "Pricing" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { href: "/#faq", label: "FAQ" },
+      { href: "/security", label: "Security" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { href: "/terms", label: "Terms" },
+      { href: "/privacy", label: "Privacy" },
+    ],
+  },
+  {
+    title: "Get the app",
+    links: [
+      { href: "https://play.google.com/store", label: "Android", external: true },
+      { href: "https://www.apple.com/app-store/", label: "iOS", external: true },
+    ],
+  },
+];
+
 const footerBottomLinks = [
+  { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms" },
-  { href: "/privacy", label: "Privacy" },
   { href: "/security", label: "Security" },
 ];
 
+// Average colour of the painting's top edge, darkened so white text passes contrast
+const FOOTER_SKY = "#4f6e69";
+
 export function Footer() {
   return (
-    <footer id="download" className="relative isolate flex flex-col overflow-hidden text-white">
-      {/* Painting: "Mount Corcoran" by Albert Bierstadt (public domain) */}
-      <Image
-        src="/images/footer-corcoran.jpg"
-        alt=""
-        fill
-        sizes="100vw"
-        className="-z-20 object-cover object-[center_35%]"
-      />
-      {/* Scrims keep the copy and links legible */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-b from-[#1d3a45]/80 via-[#1d3a45]/30 to-black/70" />
-
-      {/* Download CTA */}
-      <div className="pt-20 sm:pt-28">
-        <CenterCopy
-          badge="Available on Android &amp; iOS"
-          title={<>Grow with <Accent>clarity.</Accent></>}
-          body="Download RunwayX and see your runway in under a minute."
-          cta="Download RunwayX"
-          href="https://play.google.com/store"
-        />
+    <footer
+      id="download"
+      className="relative isolate flex min-h-[640px] flex-col overflow-hidden text-white sm:min-h-[700px] lg:min-h-[760px]"
+      style={{ backgroundColor: FOOTER_SKY }}
+    >
+      {/* Painting: "Mount Corcoran" by Albert Bierstadt (public domain), anchored to the bottom */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-20"
+        style={{
+          maskImage: "linear-gradient(to bottom, transparent 0%, #000 34%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 34%)",
+        }}
+      >
+        <Image src="/images/footer-corcoran.jpg" alt="" fill sizes="100vw" className="object-cover object-[center_70%]" />
       </div>
+      {/* Light scrims: keep the sky readable at the top and the legal bar at the bottom */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(40,62,58,0.35)_0%,rgba(40,62,58,0.1)_40%,transparent_60%,rgba(0,0,0,0.45)_100%)]" />
+      {/* Hairline separating the page from the footer, inset like Duna's */}
+      <span aria-hidden="true" className="absolute inset-x-5 top-0 h-px bg-white/25 sm:inset-x-10" />
 
-      {/* Bottom bar */}
-      <div className="mx-auto w-full max-w-[1100px] px-5 pb-8 pt-16 sm:px-6 sm:pt-20">
-        <div className="flex flex-col items-center gap-5 border-t border-white/15 pt-8 text-[13px] md:flex-row md:justify-between">
-          {/* Left: logo */}
-          <Link href="/#top" aria-label="Back to top">
-            <Logo light />
-          </Link>
-
-          {/* Center: links + AI buttons */}
-          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
-            <nav aria-label="Footer">
-              <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-medium text-white/80">
-                {footerBottomLinks.map((l) => (
+      {/* Link columns */}
+      <div className="mx-auto w-full max-w-[1120px] px-6 pt-20 sm:pt-24">
+        <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 [text-shadow:0_1px_12px_rgba(0,0,0,0.25)]">
+          {footerColumns.map((col) => (
+            <div key={col.title}>
+              <h2 className="text-[18px] font-semibold tracking-[-0.02em] sm:text-[20px]">{col.title}</h2>
+              <ul className="mt-5 space-y-3 text-[15px] font-medium text-white/90 sm:text-[16px]">
+                {col.links.map((l) => (
                   <li key={l.label}>
-                    <Link href={l.href} className="transition-colors hover:text-white">{l.label}</Link>
+                    {l.external ? (
+                      <a href={l.href} target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-70">
+                        {l.label}
+                        <span className="sr-only"> (opens in a new tab)</span>
+                      </a>
+                    ) : (
+                      <Link href={l.href} className="transition-opacity hover:opacity-70">{l.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>
-            </nav>
-            <AskAI variant="dark" label="Ask AI about RunwayX" />
-          </div>
+            </div>
+          ))}
+        </nav>
+      </div>
 
-          {/* Right: copyright */}
-          <p className="text-white/60">© 2026 RunwayX</p>
+      {/* Legal bar over the foreground */}
+      <div className="mx-auto mt-auto flex w-full max-w-[1120px] flex-col items-center gap-5 px-6 pb-8 pt-16 text-[14px] sm:text-[15px] md:flex-row md:justify-between">
+        {/* Mobile: copyright on its own line, links in one row below. Desktop: one row */}
+        <div className="flex flex-col items-center gap-2.5 font-medium text-white/75 md:flex-row md:gap-7">
+          <p>© RunwayX 2026</p>
+          <ul className="flex items-center gap-5 whitespace-nowrap md:gap-7">
+            {footerBottomLinks.map((l) => (
+              <li key={l.label}>
+                <Link href={l.href} className="transition-colors hover:text-white">{l.label}</Link>
+              </li>
+            ))}
+          </ul>
         </div>
+        <AskAI variant="summary" label="Get an AI summary of RunwayX" />
       </div>
     </footer>
   );

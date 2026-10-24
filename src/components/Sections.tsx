@@ -438,7 +438,7 @@ export function FAQ() {
           );
         })}
         </div>
-        <AskAI variant="light" label="Something else? Ask AI" className="mt-6" />
+        <AskAI variant="card" label="Something else? Ask AI" className="mt-6" />
       </div>
     </section>
   );
