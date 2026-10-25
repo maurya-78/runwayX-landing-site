@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { ChevronRight } from "lucide-react";
-import { MetalButton } from "./ui/MetalButton";
+import { RaiseButton } from "./ui/RaiseButton";
 import { FloatCard, HandNote, RisingPhone } from "./Mockups";
 import { Accent } from "./Sections";
 import Link from "next/link";
@@ -134,13 +134,12 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.6, ease }}
         >
-          <MetalButton
+          <RaiseButton
             href="/#download"
-            metalFxClassName="bg-[#140d0b] text-white shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] hover:bg-black"
             className="px-6 py-3 text-[16px] font-semibold tracking-[-0.01em] sm:px-7 sm:py-3.5 sm:text-[18px]"
           >
             Get the app
-          </MetalButton>
+          </RaiseButton>
         </motion.div>
       </div>
     </section>
