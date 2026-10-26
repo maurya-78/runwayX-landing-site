@@ -6,15 +6,52 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 /**
  * "Ask AI about RunwayX": a label plus four round icon-only buttons that open
  * ChatGPT, Claude, Gemini or DeepSeek in a new tab with a neutral prompt.
- * Every click also copies the prompt to the clipboard, because Gemini and
- * DeepSeek don't reliably accept a prefilled prompt from the URL.
+ * The prompt links to the README served at /readme.md, so the assistant can
+ * read the full product context. The full README is too long for a URL, so
+ * every click also copies prompt + README to the clipboard for pasting
+ * (Gemini and DeepSeek don't reliably accept a prefilled prompt anyway).
  * Used in the footer (`summary` variant) and the FAQ (`card` variant).
  * Brand logos: @lobehub/icons-static-svg 1.98.0 (MIT).
  */
 export const AI_PROMPT =
   "RunwayX is a finance app for startups, built with Flutter for Android and iOS. It tracks expenses, calculates burn rate and runway, supports team members with role-based access, scans receipts and includes an AI CFO chat. Data is stored on Firebase with per-startup access rules. Explain what an app like this does and what a founder should check when evaluating it.";
 
-const q = encodeURIComponent(AI_PROMPT);
+const README_PATH = "/readme.md";
+
+/**
+ * Always the production URL, so links opened from localhost or preview
+ * deployments still point assistants at a page they can actually reach.
+ */
+export const README_URL = `https://runwayx.openforge.in${README_PATH}`;
+
+/** Prompt with a pointer to the README; used in the URL and the preview */
+const PROMPT_WITH_LINK = `${AI_PROMPT}\n\nUse the full RunwayX README as context: ${README_URL}`;
+const q = encodeURIComponent(PROMPT_WITH_LINK);
+
+/**
+ * Fetched once per page and shared by every AskAI instance. Prefetched on
+ * mount so the click handler can copy synchronously: Safari rejects
+ * clipboard writes that happen after an await.
+ */
+let readmeText: string | undefined;
+let readmeRequest: Promise<void> | undefined;
+const prefetchReadme = () => {
+  readmeRequest ??= fetch(README_PATH)
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+    .then((t) => {
+      readmeText = t;
+    })
+    .catch(() => {
+      readmeRequest = undefined; // let the next mount retry
+    });
+};
+
+const ASSISTANT_URLS = {
+  ChatGPT: (q: string) => `https://chatgpt.com/?q=${q}`,
+  Claude: (q: string) => `https://claude.ai/new?q=${q}`,
+  Gemini: (q: string) => `https://gemini.google.com/app?prompt=${q}`,
+  DeepSeek: () => "https://chat.deepseek.com/",
+} as const;
 
 type IconProps = { uid: string };
 
@@ -72,16 +109,23 @@ function DeepSeekIcon() {
   );
 }
 
-type Assistant = { name: string; href: string; Icon: (p: IconProps) => React.ReactElement };
+type Assistant = {
+  name: keyof typeof ASSISTANT_URLS;
+  Icon: (p: IconProps) => React.ReactElement;
+};
 
 const ASSISTANTS: readonly Assistant[] = [
-  { name: "ChatGPT", href: `https://chatgpt.com/?q=${q}`, Icon: OpenAIIcon },
-  { name: "Claude", href: `https://claude.ai/new?q=${q}`, Icon: ClaudeIcon },
-  { name: "Gemini", href: `https://gemini.google.com/app?prompt=${q}`, Icon: GeminiIcon },
-  { name: "DeepSeek", href: "https://chat.deepseek.com/", Icon: DeepSeekIcon },
+  { name: "ChatGPT", Icon: OpenAIIcon },
+  { name: "Claude", Icon: ClaudeIcon },
+  { name: "Gemini", Icon: GeminiIcon },
+  { name: "DeepSeek", Icon: DeepSeekIcon },
 ];
 
-const MESSAGES = { copied: "Prompt copied", failed: "Couldn't copy prompt" } as const;
+const MESSAGES = {
+  copied: "Prompt copied",
+  copiedReadme: "Prompt and README copied",
+  failed: "Couldn't copy prompt",
+} as const;
 type Status = "" | keyof typeof MESSAGES;
 
 /**
@@ -104,8 +148,11 @@ export default function AskAI({
   const [status, setStatus] = useState<Status>("");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Only cleanup lives in an effect; state changes happen in event callbacks
-  useEffect(() => () => clearTimeout(timer.current), []);
+  // Effects only prefetch and clean up; state changes happen in event callbacks
+  useEffect(() => {
+    prefetchReadme();
+    return () => clearTimeout(timer.current);
+  }, []);
 
   const show = (s: Exclude<Status, "">) => {
     setStatus(s);
@@ -117,14 +164,18 @@ export default function AskAI({
   const copyPrompt = () => {
     const clip = typeof navigator !== "undefined" ? navigator.clipboard : undefined;
     if (!clip?.writeText) return show("failed");
-    clip.writeText(AI_PROMPT).then(
-      () => show("copied"),
+    // Full README when it's loaded, otherwise the prompt with the README link
+    const text = readmeText
+      ? `${AI_PROMPT}\n\nFull RunwayX README for context:\n\n${readmeText}`
+      : PROMPT_WITH_LINK;
+    clip.writeText(text).then(
+      () => show(readmeText ? "copiedReadme" : "copied"),
       () => show("failed"),
     );
   };
 
-  const linkProps = (name: string, href: string) => ({
-    href,
+  const linkProps = (name: Assistant["name"]) => ({
+    href: ASSISTANT_URLS[name](q),
     target: "_blank",
     rel: "noopener noreferrer",
     onClick: copyPrompt,
@@ -147,10 +198,10 @@ export default function AskAI({
         </span>
         <span aria-hidden="true" className="h-5 w-px bg-white/35" />
         <ul className="flex items-center">
-          {ASSISTANTS.map(({ name, href, Icon }) => (
+          {ASSISTANTS.map(({ name, Icon }) => (
             <li key={name} className="group relative">
               <a
-                {...linkProps(name, href)}
+                {...linkProps(name)}
                 className="grid h-8 w-8 place-items-center rounded-full text-white transition hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white [&_svg]:h-[18px] [&_svg]:w-[18px]"
               >
                 <Icon uid={uid} />
@@ -184,14 +235,14 @@ export default function AskAI({
       {/* Prompt preview, styled like a chat input */}
       <p className="mt-3 rounded-xl bg-paper px-3.5 py-2.5 text-[13px] leading-relaxed text-ink/55">
         <span className="sr-only">Prompt that will be sent: </span>
-        <span className="line-clamp-2">{AI_PROMPT}</span>
+        <span className="line-clamp-2">{PROMPT_WITH_LINK}</span>
       </p>
 
       <ul className="mt-3 flex flex-wrap gap-2">
-        {ASSISTANTS.map(({ name, href, Icon }) => (
+        {ASSISTANTS.map(({ name, Icon }) => (
           <li key={name}>
             <a
-              {...linkProps(name, href)}
+              {...linkProps(name)}
               className="group inline-flex items-center gap-2 rounded-lg border border-line bg-white py-1.5 pl-2 pr-2.5 text-[13px] font-medium text-ink/80 transition hover:border-ink/25 hover:bg-paper hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             >
               <Icon uid={uid} />

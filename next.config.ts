@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   partialPrefetching: true,
+  // /readme.md reads README.md at runtime; ship it with the serverless bundle
+  outputFileTracingIncludes: {
+    "/readme.md": ["./README.md"],
+  },
   turbopack: {
     rules: {
       "*.css": {
